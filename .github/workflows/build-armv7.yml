@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -39,9 +39,10 @@ jobs:
           GIN_MODE: release
         run: |
           go build -trimpath -ldflags="-s -w -X github.com/komari-monitor/komari/utils.CurrentVersion=1.6.0-armv7" -o komari-linux-armv7
+          chmod +x komari-linux-armv7
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: komari-linux-armv7
-          path: komari-linux-armv7
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create armv7-1.6.0 komari-linux-armv7 --repo "$GITHUB_REPOSITORY" --title "armv7 1.6.0" --notes "armv7 build for OneThing WKY" || gh release upload armv7-1.6.0 komari-linux-armv7 --repo "$GITHUB_REPOSITORY" --clobber
